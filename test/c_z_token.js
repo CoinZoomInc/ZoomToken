@@ -1,5 +1,7 @@
 const CZToken = artifacts.require('CZToken');
 const expectEvent = require('../node_modules/openzeppelin-solidity/test/helpers/expectEvent');
+const shouldFail = require('../node_modules/openzeppelin-solidity/test/helpers/shouldFail');
+const { ZERO_ADDRESS } = require('../node_modules/openzeppelin-solidity/test/helpers/constants');
 
 const BigNumber = web3.BigNumber;
 
@@ -19,7 +21,7 @@ contract('CZToken', accounts => {
 
   it('has a name', async function () {
     const name = await token.name();
-    assert.equal(name, 'COINZOOM');
+    assert.equal(name, 'CZToken');
   });
 
   it('has a symbol', async function () {
@@ -40,12 +42,44 @@ contract('CZToken', accounts => {
     });
   });
 
+
+  describe('transfer', function () {
+    describe('when the recipient is not the zero address', function () {
+      const to = recipient;
+        describe('when the sender has enough balance', function () {
+        const amount = 100;
+
+        it('transfers the requested amount', async function () {
+          await token.transfer(to, amount, { from: owner });
+        });
+
+        it('emits a transfer event', async function () {
+          const { logs } = await token.transfer(to, amount, { from: owner });
+
+          expectEvent.inLogs(logs, 'Transfer', {
+            from: owner,
+            to: to,
+            value: amount,
+          });
+        });
+      });
+    });
+
+    describe('when the recipient is the zero address', function () {
+      const to = ZERO_ADDRESS;
+
+      it('reverts', async function () {
+        await shouldFail.reverting(token.transfer(to, 100, { from: owner }));
+      });
+    });
+  });
+
   describe('approve', function () {
     describe('when the spender is not the zero address', function () {
       const spender = recipient;
 
       describe('when the sender has enough balance', function () {
-        const amount = 100;
+        const amount = 1000;
 
         it('emits an approval event', async function () {
           const { logs } = await token.approve(spender, amount, { from: owner });
@@ -80,39 +114,5 @@ contract('CZToken', accounts => {
     });
   });
 
-  describe('transfer', function () {
-    describe('when the recipient is not the zero address', function () {
-      const to = recipient;
-
-      describe('when the sender does not have enough balance', function () {
-        const amount = 101;
-        // it('reverts', async function () {
-        //   await revert(token.transfer(to, amount, { from: owner }));
-        // });
-      });
-
-      describe('when the sender has enough balance', function () {
-        const amount = 100;
-
-        it('transfers the requested amount', async function () {
-          await token.transfer(to, amount, { from: owner });
-
-          (await token.balanceOf(owner)).should.be.bignumber.equal(0);
-
-          (await token.balanceOf(to)).should.be.bignumber.equal(amount);
-        });
-
-        it('emits a transfer event', async function () {
-          const { logs } = await token.transfer(to, amount, { from: owner });
-
-          expectEvent.inLogs(logs, 'Transfer', {
-            from: owner,
-            to: to,
-            value: amount,
-          });
-        });
-      });
-    });
-  });  
 
 });
