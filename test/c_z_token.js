@@ -11,8 +11,8 @@ require('chai')
 
 contract('CZToken', accounts => {
   let token;
-  const anotherAccount = web3.eth.accounts[1];
   const owner = accounts[0];
+  const anotherAccount = web3.eth.accounts[1];
   const recipient = web3.eth.accounts[2];
 
   beforeEach(async function () {
@@ -21,7 +21,7 @@ contract('CZToken', accounts => {
 
   it('has a name', async function () {
     const name = await token.name();
-    assert.equal(name, 'CZToken');
+    assert.equal(name, 'CoinZoom');
   });
 
   it('has a symbol', async function () {
@@ -34,6 +34,7 @@ contract('CZToken', accounts => {
     assert(decimals.eq(18));
   });
 
+
   describe('balanceOf', function () {
     describe('when the requested account has no tokens', function () {
       it('returns zero', async function () {
@@ -42,6 +43,13 @@ contract('CZToken', accounts => {
     });
   });
 
+  describe('INITIAL_SUPPLY', function () {
+    describe('Initial supply of tokens', function () {
+      it('is correct', async function () {
+        (await token.INITIAL_SUPPLY()).should.be.bignumber.equal(1000000000 * 10**18);
+      });
+    });
+  });
 
   describe('transfer', function () {
     describe('when the recipient is not the zero address', function () {
