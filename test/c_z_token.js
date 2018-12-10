@@ -3,6 +3,7 @@ const expectEvent = require('../node_modules/openzeppelin-solidity/test/helpers/
 const shouldFail = require('../node_modules/openzeppelin-solidity/test/helpers/shouldFail');
 const { ZERO_ADDRESS } = require('../node_modules/openzeppelin-solidity/test/helpers/constants');
 
+
 const BigNumber = web3.BigNumber;
 
 require('chai')
@@ -48,6 +49,15 @@ contract('CZToken', accounts => {
       it('is correct', async function () {
         (await token.INITIAL_SUPPLY()).should.be.bignumber.equal(1000000000 * 10**18);
       });
+    });
+  });
+
+  describe('when tokens are burned', function () {
+    it('Burn test' , async() => {
+      await token.burn(10 * 10**18);
+      const totalSupply = await token.totalSupply();
+      console.log(totalSupply);
+      (await token.totalSupply()).should.be.bignumber.equal(999999990 * 10**18);
     });
   });
 
@@ -118,6 +128,9 @@ contract('CZToken', accounts => {
             (await token.allowance(owner, spender)).should.be.bignumber.equal(amount);
           });
         });
+
+
+
       });
     });
   });
